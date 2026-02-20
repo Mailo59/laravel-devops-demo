@@ -44,6 +44,6 @@ RUN chown -R www-data:www-data storage bootstrap/cache
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-EXPOSE 80
+EXPOSE 8080
 
 CMD ["/usr/bin/supervisord"]
