@@ -14,8 +14,8 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar extensiones PHP
 RUN docker-php-ext-install \
+    pdo \
     pdo_pgsql \
     pgsql \
     mbstring \
@@ -26,25 +26,22 @@ RUN docker-php-ext-install \
     zip
 
 # Instalar Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copiar solo composer primero (mejor cache)
-COPY composer.json composer.lock ./
-
-RUN composer install --no-dev --optimize-autoloader --no-interaction
-
-# Copiar resto del proyecto
+#  Copiamos TODO el proyecto primero
 COPY . .
 
-# Permisos
+#  Ahora sí ejecutamos composer
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction
+
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Config nginx
 COPY docker/nginx/default.conf /etc/nginx/sites-available/default
-
-# Config supervisor
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 EXPOSE 80
